@@ -15,7 +15,7 @@ from flask import render_template
 
 import torch
 import torch.nn.functional as F
-
+sys.path.append('.')
 from monoport.lib.common.config import get_cfg_defaults
 from monoport.lib.modeling.MonoPortNet import MonoPortNet
 from monoport.lib.modeling.MonoPortNet import PIFuNetG, PIFuNetC
@@ -464,6 +464,17 @@ loader = DataLoader(
 )
 
 
+def debugRender(data):
+    window = data[0].numpy()
+    window = window.transpose(1, 2, 0)
+    window = (window * 0.5 + 0.5) * 255.0
+    window = np.uint8(window)
+    window = cv2.cvtColor(window, cv2.COLOR_BGR2RGB) 
+    window = cv2.resize(window, (0, 0), fx=2, fy=2)
+
+    cv2.imshow('window', window)
+    cv2.waitKey(1)
+    
 def main_loop():
     global DESKTOP_MODE, SERVER_MODE, VIEW_MODE
 
@@ -485,6 +496,7 @@ def main_loop():
         return background
 
     for data_dict in tqdm.tqdm(loader):
+        debugRender(data_dict)
         render_norm = data_dict["render_norm"] # [256, 256, 3] RGB
         render_tex = data_dict["render_tex"] # [256, 256, 3] RGB
         mask = data_dict["mask"]
